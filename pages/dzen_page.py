@@ -13,10 +13,12 @@ class DzenPage(BasePage):
 
         return (
             (hostname == "dzen.ru" or hostname.endswith(".dzen.ru"))
-            and parsed.path.rstrip("/") == ""
+            and parsed_url.path.rstrip("/") == ""
         )
 
     @allure.step("Дождаться главной страницы Дзена")
     def wait_until_homepage(self):
-        
-        return self.wait_for_url(self.is_homepage_url, timeout=30)
+        return self.wait_for_url(
+            self.is_homepage_url,
+            timeout=30,
+        )

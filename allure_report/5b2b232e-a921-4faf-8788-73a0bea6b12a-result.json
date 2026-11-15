@@ -1,0 +1,1 @@
+{"name": "Логотип Яндекса открывает Дзен в новом окне", "status": "skipped", "start": 1794763043963, "stop": 1794763043963, "uuid": "550556ab-8962-4ef0-8534-cf25e49c6242", "testCaseId": "3ab567c60038827b8e2338c04055bb9e", "fullName": "tests.test_navigation.TestLogoNavigation#test_yandex_logo_opens_dzen_in_new_window"}

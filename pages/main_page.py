@@ -1,7 +1,6 @@
 from urllib.parse import urlparse
 
 import allure
-from selenium.webdriver.support import expected_conditions as EC
 
 from urls import URL
 from locators.main_page_locators import MainPageLocators
@@ -10,41 +9,29 @@ from pages.order_page import OrderPage
 
 
 class MainPage(BasePage):
-    @allure.step("Открыть главную страницу Самоката")
     def open(self):
-        self.driver.get(URL)
-        return self.wait_until_home()
+        self.open_url(URL)
+        self.wait_until_home()
+        return self
 
     @staticmethod
     def is_homepage_url(url):
-        current_url = urlparse(url)
-        expected_url = urlparse(URL)
+        current = urlparse(url)
+        expected = urlparse(URL)
 
         return (
-            current_url.hostname == expected_url.hostname
-            and current_url.path.rstrip("/") == ""
+            current.hostname == expected.hostname
+            and current.path.rstrip("/") == ""
         )
 
-    @allure.step("Дождаться главной страницы")
     def wait_until_home(self):
-        self.wait.until(
-            lambda driver: self.is_homepage_url(driver.current_url)
-        )
-        self.wait.until(
-            EC.visibility_of_element_located(
-                MainPageLocators.TOP_ORDER_BUTTON
-            )
-        )
-        return self
+        homepage_url = self.wait_for_url(self.is_homepage_url)
+        self.wait_visible(MainPageLocators.TOP_ORDER_BUTTON)
+        return homepage_url
 
-    @allure.step("Нажать кнопку заказа: {entry_point}")
-    def click_order_button(self, entry_point):
-        locator = MainPageLocators.ORDER_BUTTONS.get(entry_point)
-        if locator is None:
-            raise ValueError(f"Неизвестная точка входа: {entry_point}")
-
-        self.click(locator)
-        return OrderPage(self.driver).wait_until_ready()
+    def accept_cookie_banner(self):
+        self.click(MainPageLocators.COOKIE_ACCEPT_BUTTON)
+        self.wait_invisible(MainPageLocators.COOKIE_ACCEPT_BUTTON)
 
     @allure.step("Открыть ответ FAQ с индексом {index}")
     def expand_faq(self, index):
@@ -57,15 +44,16 @@ class MainPage(BasePage):
             index,
         )
 
-        question_text = self.wait_visible(question_locator).text.strip()
+        question_text = self.get_text(question_locator)
         self.click(question_locator)
+        answer_text = self.wait_for_text(answer_locator)
 
-        self.wait_visible(answer_locator)
-        self.wait.until(
-            lambda driver: bool(
-                driver.find_element(*answer_locator).text.strip()
-            )
-        )
-
-        answer_text = self.driver.find_element(*answer_locator).text.strip()
         return question_text, answer_text
+
+    def click_order_button(self, entry_point):
+        locator = MainPageLocators.ORDER_BUTTONS.get(entry_point)
+        if locator is None:
+            raise ValueError(f"Неизвестная точка входа: {entry_point}")
+
+        self.click(locator)
+        return self.create_page(OrderPage).wait_until_ready()

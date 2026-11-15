@@ -79,8 +79,7 @@ class TestImportantQuestions:
         expected_question,
         expected_answer,
     ):
-        page = MainPage(driver).open()
-
+        page = MainPage(driver)
         actual_question, actual_answer = page.expand_faq(index)
 
         assert actual_question == expected_question
