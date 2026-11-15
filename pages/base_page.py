@@ -10,7 +10,17 @@ from locators.base_locators import BaseLocators
 class BasePage:
     def __init__(self, driver, timeout=15):
         self.driver = driver
-        self.wait = WebDriverWait(driver, timeout)
+        self.timeout = timeout
+
+    def wait_for_url(self, url_condition, timeout=30):
+        return WebDriverWait(self.driver, timeout).until(
+            lambda browser: (
+                browser.current_url
+                if url_condition(browser.current_url)
+                else False
+            )
+        )
+
 
     @allure.step("Кликнуть по элементу")
     def click(self, locator):
